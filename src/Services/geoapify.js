@@ -1,0 +1,37 @@
+import { GEOAPIFY_API_KEY } from '../Config/Geoapify';
+
+const BASE_URL = 'https://api.geoapify.com/v1/geocode/autocomplete';
+
+export const searchPlaces = async (text, userLocation = null) => {
+  if (!text) return [];
+
+  try {
+    const params = new URLSearchParams({
+      text: text,
+      apiKey: GEOAPIFY_API_KEY,
+      filter: 'countrycode:in',
+      limit: '5',
+    });
+
+    if (userLocation && userLocation.longitude && userLocation.latitude) {
+      params.append('bias', `proximity:${userLocation.longitude},${userLocation.latitude}`);
+    }
+
+    const response = await fetch(`${BASE_URL}?${params.toString()}`);
+    const data = await response.json();
+
+    if (data && data.features) {
+      return data.features.map((feature) => ({
+        id: feature.properties.place_id,
+        name: feature.properties.formatted,
+        lat: feature.properties.lat,
+        lon: feature.properties.lon,
+        ...feature.properties,
+      }));
+    }
+    return [];
+  } catch (error) {
+    console.error('Geoapify search error:', error);
+    return [];
+  }
+};

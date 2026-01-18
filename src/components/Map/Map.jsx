@@ -5,7 +5,7 @@ import { ThemeContext } from '../../theme/ThemeContext';
 
 import '../../Config/MapBox';
 
-const Map = () => {
+const Map = ({ onLocationUpdate }) => {
   const theme = useContext(ThemeContext);
 
   const mapStyle =
@@ -33,7 +33,15 @@ const Map = () => {
         pitchEnabled={false}   
         rotateEnabled={false}
       >
-        
+        <Mapbox.UserLocation
+          visible={false}
+          onUpdate={(location) => {
+            if (location && location.coords && onLocationUpdate) {
+              onLocationUpdate(location.coords);
+            }
+          }}
+        />
+
         <Mapbox.Camera
           followUserLocation={true}   
           followZoomLevel={16}
