@@ -35,9 +35,8 @@ const TransparentSearchBar = ({ userLocation }) => {
     }, [debouncedQuery, userLocation]);
 
     const handleSelectPlace = (place) => {
-        setQuery(place.name); // Set input to selected place name
-        setResults([]); // Clear results
-        // TODO: Handle navigation to the selected place on the map
+        setQuery(place.name);
+        setResults([]);
         console.log("Selected place:", place);
     };
 
