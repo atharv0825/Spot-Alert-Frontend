@@ -8,6 +8,7 @@ import Home from "./src/Screens/Home/Home";
 import Login from "./src/Screens/Auth/Login";
 import SignUp from "./src/Screens/Auth/Signup";
 import Map from "./src/Screens/Map/MapScreen"
+import AddSpot from "./src/Screens/AddSpot/AddSpot";
 // import Map from "./src/components/Map/Map"
 
 import { ThemeProvider } from "./src/theme/ThemeContext"
@@ -25,6 +26,7 @@ const App = () => {
           <Stack.Screen name="login" component={Login} />
           <Stack.Screen name="splash" component={SplashScreen}/>
           <Stack.Screen name="map" component={Map}/>
+          <Stack.Screen name="addspot" component={AddSpot}/>
         </Stack.Navigator>
       </NavigationContainer>
     </ThemeProvider>

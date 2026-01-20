@@ -40,6 +40,11 @@ const Home = ({ navigation }) => {
         widthRatio={0.30}
         onPress={() => navigation.navigate("map")}
       />
+      <PrimaryBtn
+        title="Add Spot"
+        widthRatio={0.30}
+        onPress={() => navigation.navigate("addspot")}
+      />
     </View>
   );
 };
