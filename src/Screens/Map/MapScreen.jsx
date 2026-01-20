@@ -5,15 +5,26 @@ import Searchbar from "../../components/Searchbar/Searchbar";
 
 const MapScreen = () => {
   const [userLocation, setUserLocation] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
   const handleLocationUpdate = (location) => {
     setUserLocation(location);
   };
 
+  const handlePlaceSelect = (location) => {
+    setSelectedLocation(location);
+  };
+
   return (
     <View style={styles.container}>
-      <Map onLocationUpdate={handleLocationUpdate} />
-      <Searchbar userLocation={userLocation} />
+      <Map
+        onLocationUpdate={handleLocationUpdate}
+        selectedLocation={selectedLocation}
+      />
+      <Searchbar
+        userLocation={userLocation}
+        onPlaceSelect={handlePlaceSelect}
+      />
     </View>
   );
 };

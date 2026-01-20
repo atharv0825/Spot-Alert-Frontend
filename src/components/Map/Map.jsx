@@ -1,12 +1,13 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import Mapbox from '@rnmapbox/maps';
 import { ThemeContext } from '../../theme/ThemeContext';
 
 import '../../Config/MapBox';
 
-const Map = ({ onLocationUpdate }) => {
+const Map = ({ onLocationUpdate, selectedLocation }) => {
   const theme = useContext(ThemeContext);
+  const cameraRef = useRef(null);
 
   const mapStyle =
     theme.background === '#000000'
@@ -23,6 +24,15 @@ const Map = ({ onLocationUpdate }) => {
     requestPermission();
   }, []);
 
+  useEffect(() => {
+    if (selectedLocation && cameraRef.current) {
+      cameraRef.current.flyTo(
+        [selectedLocation.longitude, selectedLocation.latitude],
+        10000
+      );
+    }
+  }, [selectedLocation]);
+
   return (
     <View style={styles.container}>
       <Mapbox.MapView
@@ -30,7 +40,7 @@ const Map = ({ onLocationUpdate }) => {
         styleURL={mapStyle}
         compassPosition={{ top: 80, right: 20 }}
         logoEnabled={false}
-        pitchEnabled={false}   
+        pitchEnabled={false}
         rotateEnabled={false}
       >
         <Mapbox.UserLocation
@@ -43,17 +53,18 @@ const Map = ({ onLocationUpdate }) => {
         />
 
         <Mapbox.Camera
-          followUserLocation={true}   
+          ref={cameraRef}
+          followUserLocation={!selectedLocation}
           followZoomLevel={16}
           pitch={40}
           heading={0}
         />
-        
+
         <Mapbox.LocationPuck
           visible={true}
           pulsing={{ isEnabled: true }}
         />
-        
+
         <Mapbox.FillExtrusionLayer
           id="3d-buildings"
           sourceID="composite"
