@@ -16,7 +16,7 @@ import { useDebounce } from "../../hooks/useDebounce";
 
 const { width } = Dimensions.get("window");
 
-const TransparentSearchBar = ({ userLocation }) => {
+const TransparentSearchBar = ({ userLocation, onPlaceSelect }) => {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState([]);
     const debouncedQuery = useDebounce(query, 500);
@@ -37,7 +37,13 @@ const TransparentSearchBar = ({ userLocation }) => {
     const handleSelectPlace = (place) => {
         setQuery(place.name);
         setResults([]);
-        console.log("Selected place:", place);
+        if (onPlaceSelect) {
+            onPlaceSelect({
+                latitude: place.lat,
+                longitude: place.lon,
+            });
+        }
+        console.log("Selected place - Latitude:", place.lat, "Longitude:", place.lon);
     };
 
     return (
