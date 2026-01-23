@@ -5,7 +5,7 @@ import { ThemeContext } from '../../theme/ThemeContext';
 
 import '../../Config/MapBox';
 
-const Map = ({ onLocationUpdate, selectedLocation }) => {
+const Map = ({ onLocationUpdate, selectedLocation, route, isNavigation }) => {
   const theme = useContext(ThemeContext);
   const cameraRef = useRef(null);
 
@@ -25,13 +25,13 @@ const Map = ({ onLocationUpdate, selectedLocation }) => {
   }, []);
 
   useEffect(() => {
-    if (selectedLocation && cameraRef.current) {
+    if (selectedLocation && cameraRef.current && !isNavigation) {
       cameraRef.current.flyTo(
         [selectedLocation.longitude, selectedLocation.latitude],
         10000
       );
     }
-  }, [selectedLocation]);
+  }, [selectedLocation, isNavigation]);
 
   return (
     <View style={styles.container}>
@@ -40,8 +40,8 @@ const Map = ({ onLocationUpdate, selectedLocation }) => {
         styleURL={mapStyle}
         compassPosition={{ top: 80, right: 20 }}
         logoEnabled={false}
-        pitchEnabled={false}
-        rotateEnabled={false}
+        pitchEnabled={isNavigation}
+        rotateEnabled={isNavigation}
       >
         <Mapbox.UserLocation
           visible={false}
@@ -54,9 +54,10 @@ const Map = ({ onLocationUpdate, selectedLocation }) => {
 
         <Mapbox.Camera
           ref={cameraRef}
-          followUserLocation={!selectedLocation}
-          followZoomLevel={16}
-          pitch={40}
+          followUserLocation={isNavigation || !selectedLocation}
+          followZoomLevel={isNavigation ? 18 : 16}
+          followPitch={isNavigation ? 60 : 40}
+          pitch={isNavigation ? 60 : 40}
           heading={0}
         />
 
@@ -64,6 +65,29 @@ const Map = ({ onLocationUpdate, selectedLocation }) => {
           visible={true}
           pulsing={{ isEnabled: true }}
         />
+
+        {selectedLocation && (
+          <Mapbox.PointAnnotation
+            id="selectedLocation"
+            coordinate={[
+              selectedLocation.longitude,
+              selectedLocation.latitude,
+            ]}
+          />
+        )}
+
+        {route && (
+          <Mapbox.ShapeSource id="routeSource" shape={{ type: 'Feature', geometry: route }}>
+            <Mapbox.LineLayer
+              id="routeLine"
+              style={{
+                lineColor: '#007AFF',
+                lineWidth: 4,
+                lineOpacity: 0.8,
+              }}
+            />
+          </Mapbox.ShapeSource>
+        )}
 
         <Mapbox.FillExtrusionLayer
           id="3d-buildings"
