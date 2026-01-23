@@ -1,6 +1,7 @@
 import { GEOAPIFY_API_KEY } from '../Config/Geoapify';
 
-const BASE_URL = 'https://api.geoapify.com/v1/geocode/autocomplete';
+const AUTOCOMPLETE_BASE_URL = 'https://api.geoapify.com/v1/geocode/autocomplete';
+const ROUTING_BASE_URL = 'https://api.geoapify.com/v1/routing';
 
 export const searchPlaces = async (text, userLocation = null) => {
   if (!text) return [];
@@ -17,7 +18,7 @@ export const searchPlaces = async (text, userLocation = null) => {
       params.append('bias', `proximity:${userLocation.longitude},${userLocation.latitude}`);
     }
 
-    const response = await fetch(`${BASE_URL}?${params.toString()}`);
+    const response = await fetch(`${AUTOCOMPLETE_BASE_URL}?${params.toString()}`);
     const data = await response.json();
 
     if (data && data.features) {
@@ -33,5 +34,28 @@ export const searchPlaces = async (text, userLocation = null) => {
   } catch (error) {
     console.error('Geoapify search error:', error);
     return [];
+  }
+};
+
+export const getRoute = async (userLocation, destinationLocation) => {
+  if (!userLocation || !destinationLocation) return null;
+
+  try {
+    const params = new URLSearchParams({
+      waypoints: `${userLocation.latitude},${userLocation.longitude}|${destinationLocation.latitude},${destinationLocation.longitude}`,
+      mode: 'drive',
+      apiKey: GEOAPIFY_API_KEY,
+    });
+
+    const response = await fetch(`${ROUTING_BASE_URL}?${params.toString()}`);
+    const data = await response.json();
+
+    if (data && data.features && data.features.length > 0) {
+      return data.features[0].geometry;
+    }
+    return null;
+  } catch (error) {
+    console.error('Geoapify routing error:', error);
+    return null;
   }
 };
