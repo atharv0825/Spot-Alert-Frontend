@@ -12,6 +12,9 @@ const AddSpot = ({ navigation }) => {
     const [image, setImage] = useState(null);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [hazardType, setHazardType] = useState(''); // New state for hazard type
+    const [roadName, setRoadName] = useState('');     // New state for road name
+    const [city, setCity] = useState('');             // New state for city
     const [location, setLocation] = useState(null);
 
     useEffect(() => {
@@ -42,7 +45,8 @@ const AddSpot = ({ navigation }) => {
     };
 
     const handleSubmit = async () => {
-        if (!image || !title || !description || !location) {
+        // Updated validation to include new fields
+        if (!title || !description || !hazardType || !roadName || !city || !location) {
             Alert.alert('All fields are required');
             return;
         }
@@ -52,10 +56,10 @@ const AddSpot = ({ navigation }) => {
             description,
             latitude: location.latitude,
             longitude: location.longitude,
-            type: 'USER_REPORTED',
-            severity: 5,
-            roadName: 'Unknown',
-            city: 'Unknown',
+            type: hazardType,       // Use user-provided type
+            severity: 5,            // Still hardcoded, can be made dynamic later
+            roadName: roadName,     // Use user-provided road name
+            city: city,             // Use user-provided city
         };
 
         try {
@@ -91,6 +95,30 @@ const AddSpot = ({ navigation }) => {
                 value={description}
                 onChangeText={setDescription}
                 multiline
+            />
+            {/* New TextInput for Hazard Type */}
+            <TextInput
+                style={[styles.input, { backgroundColor: theme.inputBgActive, color: theme.textPrimary }]}
+                placeholder="Hazard Type"
+                placeholderTextColor={theme.textSecondary}
+                value={hazardType}
+                onChangeText={setHazardType}
+            />
+            {/* New TextInput for Road Name */}
+            <TextInput
+                style={[styles.input, { backgroundColor: theme.inputBgActive, color: theme.textPrimary }]}
+                placeholder="Road Name"
+                placeholderTextColor={theme.textSecondary}
+                value={roadName}
+                onChangeText={setRoadName}
+            />
+            {/* New TextInput for City */}
+            <TextInput
+                style={[styles.input, { backgroundColor: theme.inputBgActive, color: theme.textPrimary }]}
+                placeholder="City"
+                placeholderTextColor={theme.textSecondary}
+                value={city}
+                onChangeText={setCity}
             />
             <PrimaryBtn title="Submit" onPress={handleSubmit} widthRatio={0.8} />
         </View>

@@ -1,7 +1,8 @@
 import { GEOAPIFY_API_KEY } from '../Config/Geoapify';
+import BASE_URL from '../Config/baseURL';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AUTOCOMPLETE_BASE_URL = 'https://api.geoapify.com/v1/geocode/autocomplete';
-const ROUTING_BASE_URL = 'https://api.geoapify.com/v1/routing';
 
 export const searchPlaces = async (text, userLocation = null) => {
   if (!text) return [];
@@ -41,21 +42,46 @@ export const getRoute = async (userLocation, destinationLocation) => {
   if (!userLocation || !destinationLocation) return null;
 
   try {
-    const params = new URLSearchParams({
-      waypoints: `${userLocation.latitude},${userLocation.longitude}|${destinationLocation.latitude},${destinationLocation.longitude}`,
-      mode: 'drive',
-      apiKey: GEOAPIFY_API_KEY,
+    const token = await AsyncStorage.getItem("token");
+    if (!token) {
+        console.error("Routing error: No auth token found");
+        return null;
+    }
+    const response = await fetch(`${BASE_URL}/api/user/route/optimal`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        sourceLat: userLocation.latitude,
+        sourceLng: userLocation.longitude,
+        destLat: destinationLocation.latitude,
+        destLng: destinationLocation.longitude,
+      }),
     });
 
-    const response = await fetch(`${ROUTING_BASE_URL}?${params.toString()}`);
-    const data = await response.json();
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.polyline) {
+        const decoded_waypoints = [];
 
-    if (data && data.features && data.features.length > 0) {
-      return data.features[0].geometry;
+        for (const waypoint of data.polyline) {
+            decoded_waypoints.push(waypoint);
+        }
+        return {
+          route: {
+            type: 'LineString',
+            coordinates: decoded_waypoints.map(p => [p.longitude, p.latitude])
+          },
+          hazards: data.allHazardsOnRoute
+        };
+    }
     }
     return null;
   } catch (error) {
-    console.error('Geoapify routing error:', error);
+    console.error('Routing error:', error);
     return null;
   }
 };
+

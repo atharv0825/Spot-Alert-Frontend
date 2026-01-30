@@ -8,6 +8,7 @@ const MapScreen = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [route, setRoute] = useState(null);
+  const [hazards, setHazards] = useState([]);
   const [isNavigation, setIsNavigation] = useState(false);
 
   const handleLocationUpdate = (location) => {
@@ -17,8 +18,13 @@ const MapScreen = () => {
   const handlePlaceSelect = async (location) => {
     setSelectedLocation(location);
     if (userLocation) {
-      const newRoute = await getRoute(userLocation, location);
-      setRoute(newRoute);
+      const routeData = await getRoute(userLocation, location);
+      if (routeData) {
+        setRoute(routeData.route);
+        setHazards(routeData.hazards);
+      } else {
+        console.log("Could not retrieve route. Server might be down or no route found.");
+      }
     }
   };
 
@@ -32,6 +38,7 @@ const MapScreen = () => {
         onLocationUpdate={handleLocationUpdate}
         selectedLocation={selectedLocation}
         route={route}
+        hazards={hazards}
         isNavigation={isNavigation}
       />
       {!isNavigation && (

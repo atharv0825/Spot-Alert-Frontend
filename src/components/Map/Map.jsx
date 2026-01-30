@@ -5,7 +5,7 @@ import { ThemeContext } from '../../theme/ThemeContext';
 
 import '../../Config/MapBox';
 
-const Map = ({ onLocationUpdate, selectedLocation, route, isNavigation }) => {
+const Map = ({ onLocationUpdate, selectedLocation, route, hazards, isNavigation }) => {
   const theme = useContext(ThemeContext);
   const cameraRef = useRef(null);
 
@@ -88,6 +88,15 @@ const Map = ({ onLocationUpdate, selectedLocation, route, isNavigation }) => {
             />
           </Mapbox.ShapeSource>
         )}
+
+        {hazards &&
+          hazards.map((hazard, index) => (
+            <Mapbox.PointAnnotation
+              key={index}
+              id={`hazard-${index}`}
+              coordinate={[hazard.longitude, hazard.latitude]}
+            />
+          ))}
 
         <Mapbox.FillExtrusionLayer
           id="3d-buildings"
