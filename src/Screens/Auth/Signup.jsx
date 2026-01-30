@@ -6,10 +6,12 @@ import {
   View,
   TextInput,
   useColorScheme,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import { LightTheme, DarkTheme } from "../../theme/colors";
 import { Eye, EyeOff } from "lucide-react-native";
+import BASE_URL from "../../Config/baseURL";
 
 const { width, height } = Dimensions.get("window");
 
@@ -19,6 +21,55 @@ const SignUp = ({ navigation }) => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const handleSignUp = async () => {
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${BASE_URL}/api/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+          role: "ROLE_USER",
+        }),
+      });
+
+      if (response.ok) {
+        Alert.alert(
+          "Registration Successful",
+          "A verification email has been sent to your email address. Please verify your email to login."
+        );
+        navigation.navigate("login");
+      } else {
+        const clonedResponse = response.clone(); // Clone the response
+        let errorData;
+        try {
+          errorData = await response.json(); // Try to parse original response as JSON
+        } catch (jsonError) {
+          const responseText = await clonedResponse.text(); // Read text from the cloned response
+          errorData = { message: `Server error: ${response.status} ${response.statusText}` };
+          console.log('Signup failed: Could not parse JSON response. Status:', response.status, 'StatusText:', response.statusText, 'Raw response:', responseText);
+        }
+        console.log('Signup failed:', errorData);
+        Alert.alert("Error", errorData.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log('Signup error:', error);
+      Alert.alert("Error", "An error occurred. Please try again later.");
+    }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -32,7 +83,6 @@ const SignUp = ({ navigation }) => {
           <Text style={{ color: theme.textPrimary }}> Now</Text>
         </Text>
 
-
         <TextInput
           style={[
             styles.input,
@@ -40,8 +90,9 @@ const SignUp = ({ navigation }) => {
           ]}
           placeholder="Full Name"
           placeholderTextColor={theme.textSecondary}
+          value={fullName}
+          onChangeText={setFullName}
         />
-
 
         <TextInput
           style={[
@@ -52,8 +103,10 @@ const SignUp = ({ navigation }) => {
           placeholderTextColor={theme.textSecondary}
           keyboardType="email-address"
           autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
         />
- 
+
         <View
           style={[
             styles.passwordWrapper,
@@ -67,10 +120,12 @@ const SignUp = ({ navigation }) => {
             secureTextEntry={!showPassword}
             textContentType="password"
             autoComplete="password"
+            value={password}
+            onChangeText={setPassword}
           />
 
           <TouchableOpacity
-            onPress={() => setShowPassword(prev => !prev)}
+            onPress={() => setShowPassword((prev) => !prev)}
             activeOpacity={0.7}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
@@ -96,10 +151,12 @@ const SignUp = ({ navigation }) => {
             secureTextEntry={!showConfirmPassword}
             textContentType="password"
             autoComplete="password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
           />
 
           <TouchableOpacity
-            onPress={() => setShowConfirmPassword(prev => !prev)}
+            onPress={() => setShowConfirmPassword((prev) => !prev)}
             activeOpacity={0.7}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
@@ -117,6 +174,7 @@ const SignUp = ({ navigation }) => {
 
         <TouchableOpacity
           style={[styles.loginButton, { backgroundColor: theme.accent }]}
+          onPress={handleSignUp}
         >
           <Text style={styles.loginButtonText}>Create Account</Text>
         </TouchableOpacity>
@@ -139,7 +197,6 @@ const SignUp = ({ navigation }) => {
 };
 
 export default SignUp;
-
 
 const styles = StyleSheet.create({
   container: {
